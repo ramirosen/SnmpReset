@@ -4,13 +4,14 @@
 #include <linux/string.h>
 #include <net/snmp.h>
 #include <net/net_namespace.h>
-#include <uapi/linux/icmp.h>
+#include <linux/icmp.h>
+#include <net/icmp.h>
 
 /* Developed by: Rami Rosen: http://ramirose.wix.com/ramirosen */
 /* ramirose@gmail.com */
 
 /* Supports 64 bit machine; currently no support for 32 bit machines. */
-
+#ifdef F18
 static const struct snmp_mib snmp4_net_list[] = {
 	SNMP_MIB_ITEM("SyncookiesSent", LINUX_MIB_SYNCOOKIESSENT),
 	SNMP_MIB_ITEM("SyncookiesRecv", LINUX_MIB_SYNCOOKIESRECV),
@@ -105,7 +106,85 @@ static const struct snmp_mib snmp4_net_list[] = {
 	SNMP_MIB_ITEM("TCPFastOpenCookieReqd", LINUX_MIB_TCPFASTOPENCOOKIEREQD),
 	SNMP_MIB_SENTINEL
 };
-
+#else
+static const struct snmp_mib snmp4_net_list[] = {
+         SNMP_MIB_ITEM("SyncookiesSent", LINUX_MIB_SYNCOOKIESSENT),
+         SNMP_MIB_ITEM("SyncookiesRecv", LINUX_MIB_SYNCOOKIESRECV),
+         SNMP_MIB_ITEM("SyncookiesFailed", LINUX_MIB_SYNCOOKIESFAILED),
+         SNMP_MIB_ITEM("EmbryonicRsts", LINUX_MIB_EMBRYONICRSTS),
+         SNMP_MIB_ITEM("PruneCalled", LINUX_MIB_PRUNECALLED),
+         SNMP_MIB_ITEM("RcvPruned", LINUX_MIB_RCVPRUNED),
+         SNMP_MIB_ITEM("OfoPruned", LINUX_MIB_OFOPRUNED),
+         SNMP_MIB_ITEM("OutOfWindowIcmps", LINUX_MIB_OUTOFWINDOWICMPS),
+         SNMP_MIB_ITEM("LockDroppedIcmps", LINUX_MIB_LOCKDROPPEDICMPS),
+         SNMP_MIB_ITEM("ArpFilter", LINUX_MIB_ARPFILTER),
+         SNMP_MIB_ITEM("TW", LINUX_MIB_TIMEWAITED),
+         SNMP_MIB_ITEM("TWRecycled", LINUX_MIB_TIMEWAITRECYCLED),
+         SNMP_MIB_ITEM("TWKilled", LINUX_MIB_TIMEWAITKILLED),
+         SNMP_MIB_ITEM("PAWSPassive", LINUX_MIB_PAWSPASSIVEREJECTED),
+         SNMP_MIB_ITEM("PAWSActive", LINUX_MIB_PAWSACTIVEREJECTED),
+         SNMP_MIB_ITEM("PAWSEstab", LINUX_MIB_PAWSESTABREJECTED),
+         SNMP_MIB_ITEM("DelayedACKs", LINUX_MIB_DELAYEDACKS),
+         SNMP_MIB_ITEM("DelayedACKLocked", LINUX_MIB_DELAYEDACKLOCKED),
+         SNMP_MIB_ITEM("DelayedACKLost", LINUX_MIB_DELAYEDACKLOST),
+         SNMP_MIB_ITEM("ListenOverflows", LINUX_MIB_LISTENOVERFLOWS),
+         SNMP_MIB_ITEM("ListenDrops", LINUX_MIB_LISTENDROPS),
+         SNMP_MIB_ITEM("TCPPrequeued", LINUX_MIB_TCPPREQUEUED),
+         SNMP_MIB_ITEM("TCPDirectCopyFromBacklog", LINUX_MIB_TCPDIRECTCOPYFROMBACKLOG),
+         SNMP_MIB_ITEM("TCPDirectCopyFromPrequeue", LINUX_MIB_TCPDIRECTCOPYFROMPREQUEUE),
+         SNMP_MIB_ITEM("TCPPrequeueDropped", LINUX_MIB_TCPPREQUEUEDROPPED),
+         SNMP_MIB_ITEM("TCPHPHits", LINUX_MIB_TCPHPHITS),
+         SNMP_MIB_ITEM("TCPHPHitsToUser", LINUX_MIB_TCPHPHITSTOUSER),
+         SNMP_MIB_ITEM("TCPPureAcks", LINUX_MIB_TCPPUREACKS),
+         SNMP_MIB_ITEM("TCPHPAcks", LINUX_MIB_TCPHPACKS),
+         SNMP_MIB_ITEM("TCPRenoRecovery", LINUX_MIB_TCPRENORECOVERY),
+         SNMP_MIB_ITEM("TCPSackRecovery", LINUX_MIB_TCPSACKRECOVERY),
+         SNMP_MIB_ITEM("TCPSACKReneging", LINUX_MIB_TCPSACKRENEGING),
+         SNMP_MIB_ITEM("TCPFACKReorder", LINUX_MIB_TCPFACKREORDER),
+         SNMP_MIB_ITEM("TCPSACKReorder", LINUX_MIB_TCPSACKREORDER),
+         SNMP_MIB_ITEM("TCPRenoReorder", LINUX_MIB_TCPRENOREORDER),
+         SNMP_MIB_ITEM("TCPTSReorder", LINUX_MIB_TCPTSREORDER),
+         SNMP_MIB_ITEM("TCPFullUndo", LINUX_MIB_TCPFULLUNDO),
+         SNMP_MIB_ITEM("TCPPartialUndo", LINUX_MIB_TCPPARTIALUNDO),
+         SNMP_MIB_ITEM("TCPDSACKUndo", LINUX_MIB_TCPDSACKUNDO),
+         SNMP_MIB_ITEM("TCPLossUndo", LINUX_MIB_TCPLOSSUNDO),
+         SNMP_MIB_ITEM("TCPLoss", LINUX_MIB_TCPLOSS),
+         SNMP_MIB_ITEM("TCPLostRetransmit", LINUX_MIB_TCPLOSTRETRANSMIT),
+         SNMP_MIB_ITEM("TCPRenoFailures", LINUX_MIB_TCPRENOFAILURES),
+         SNMP_MIB_ITEM("TCPSackFailures", LINUX_MIB_TCPSACKFAILURES),
+         SNMP_MIB_ITEM("TCPLossFailures", LINUX_MIB_TCPLOSSFAILURES),
+         SNMP_MIB_ITEM("TCPFastRetrans", LINUX_MIB_TCPFASTRETRANS),
+         SNMP_MIB_ITEM("TCPForwardRetrans", LINUX_MIB_TCPFORWARDRETRANS),
+         SNMP_MIB_ITEM("TCPSlowStartRetrans", LINUX_MIB_TCPSLOWSTARTRETRANS),
+         SNMP_MIB_ITEM("TCPTimeouts", LINUX_MIB_TCPTIMEOUTS),
+         SNMP_MIB_ITEM("TCPRenoRecoveryFail", LINUX_MIB_TCPRENORECOVERYFAIL),
+         SNMP_MIB_ITEM("TCPSackRecoveryFail", LINUX_MIB_TCPSACKRECOVERYFAIL),
+         SNMP_MIB_ITEM("TCPSchedulerFailed", LINUX_MIB_TCPSCHEDULERFAILED),
+         SNMP_MIB_ITEM("TCPRcvCollapsed", LINUX_MIB_TCPRCVCOLLAPSED),
+         SNMP_MIB_ITEM("TCPDSACKOldSent", LINUX_MIB_TCPDSACKOLDSENT),
+         SNMP_MIB_ITEM("TCPDSACKOfoSent", LINUX_MIB_TCPDSACKOFOSENT),
+         SNMP_MIB_ITEM("TCPDSACKRecv", LINUX_MIB_TCPDSACKRECV),
+         SNMP_MIB_ITEM("TCPDSACKOfoRecv", LINUX_MIB_TCPDSACKOFORECV),
+         SNMP_MIB_ITEM("TCPAbortOnSyn", LINUX_MIB_TCPABORTONSYN),
+         SNMP_MIB_ITEM("TCPAbortOnData", LINUX_MIB_TCPABORTONDATA),
+         SNMP_MIB_ITEM("TCPAbortOnClose", LINUX_MIB_TCPABORTONCLOSE),
+         SNMP_MIB_ITEM("TCPAbortOnMemory", LINUX_MIB_TCPABORTONMEMORY),
+         SNMP_MIB_ITEM("TCPAbortOnTimeout", LINUX_MIB_TCPABORTONTIMEOUT),
+         SNMP_MIB_ITEM("TCPAbortOnLinger", LINUX_MIB_TCPABORTONLINGER),
+         SNMP_MIB_ITEM("TCPAbortFailed", LINUX_MIB_TCPABORTFAILED),
+         SNMP_MIB_ITEM("TCPMemoryPressures", LINUX_MIB_TCPMEMORYPRESSURES),
+         SNMP_MIB_ITEM("TCPSACKDiscard", LINUX_MIB_TCPSACKDISCARD),
+         SNMP_MIB_ITEM("TCPDSACKIgnoredOld", LINUX_MIB_TCPDSACKIGNOREDOLD),
+         SNMP_MIB_ITEM("TCPDSACKIgnoredNoUndo", LINUX_MIB_TCPDSACKIGNOREDNOUNDO),
+         SNMP_MIB_ITEM("TCPSpuriousRTOs", LINUX_MIB_TCPSPURIOUSRTOS),
+         SNMP_MIB_ITEM("TCPMD5NotFound", LINUX_MIB_TCPMD5NOTFOUND),
+         SNMP_MIB_ITEM("TCPMD5Unexpected", LINUX_MIB_TCPMD5UNEXPECTED),
+         SNMP_MIB_ITEM("TCPSackShifted", LINUX_MIB_SACKSHIFTED),
+         SNMP_MIB_ITEM("TCPSackMerged", LINUX_MIB_SACKMERGED),
+         SNMP_MIB_ITEM("TCPSackShiftFallback", LINUX_MIB_SACKSHIFTFALLBACK),
+         SNMP_MIB_SENTINEL
+};
+#endif
 /* Following RFC4293 items are displayed in /proc/net/netstat */
 static const struct snmp_mib snmp4_ipextstats_list[] = {
 	SNMP_MIB_ITEM("InNoRoutes", IPSTATS_MIB_INNOROUTES),
@@ -206,7 +285,10 @@ void snmp_zero_field(void __percpu *mib[], int offt)
 static int __init init_snmp_reset(void)
 {
 	int i;
+#ifdef F18
+xxx
 	atomic_long_t *ptr = (&init_net)->mib.icmpmsg_statistics->mibs;
+#endif
 	printk(KERN_DEBUG "Developed  by Rami Rosen (ramirose@gmail.com): http://ramirose.wix.com/ramirosen\n");
 
 	BUILD_BUG_ON(offsetof(struct ipstats_mib, mibs) != 0);
@@ -229,11 +311,20 @@ static int __init init_snmp_reset(void)
 	for (i = 0; snmp4_ipextstats_list[i].name != NULL; i++)
   	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
 					     snmp4_ipextstats_list[i].entry);
-
+#ifdef F18 
 	for (i=0; icmpmibmap[i].name != NULL; i++) {
     atomic_long_set((ptr + icmpmibmap[i].index), 0);
 	  atomic_long_set((ptr + (icmpmibmap[i].index | 0x100)), 0);
 	}
+#else
+	for (i=0; icmpmibmap[i].name != NULL; i++) {
+  	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
+					     icmpmibmap[i].index);
+  	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
+					     (icmpmibmap[i].index | 0x100));
+	}
+#endif
+
 	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_INMSGS);
 	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_INERRORS);		
 	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_OUTMSGS);
