@@ -11,7 +11,8 @@
 /* ramirose@gmail.com */
 
 /* Supports 64 bit machine; currently no support for 32 bit machines. */
-#ifdef F18
+#define F20
+#ifdef F20
 static const struct snmp_mib snmp4_net_list[] = {
 	SNMP_MIB_ITEM("SyncookiesSent", LINUX_MIB_SYNCOOKIESSENT),
 	SNMP_MIB_ITEM("SyncookiesRecv", LINUX_MIB_SYNCOOKIESRECV),
@@ -285,8 +286,7 @@ void snmp_zero_field(void __percpu *mib[], int offt)
 static int __init init_snmp_reset(void)
 {
 	int i;
-#ifdef F18
-xxx
+#ifdef F20
 	atomic_long_t *ptr = (&init_net)->mib.icmpmsg_statistics->mibs;
 #endif
 	printk(KERN_DEBUG "Developed  by Rami Rosen (ramirose@gmail.com): http://ramirose.wix.com/ramirosen\n");
@@ -311,7 +311,7 @@ xxx
 	for (i = 0; snmp4_ipextstats_list[i].name != NULL; i++)
   	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
 					     snmp4_ipextstats_list[i].entry);
-#ifdef F18 
+#ifdef F20 
 	for (i=0; icmpmibmap[i].name != NULL; i++) {
     atomic_long_set((ptr + icmpmibmap[i].index), 0);
 	  atomic_long_set((ptr + (icmpmibmap[i].index | 0x100)), 0);
