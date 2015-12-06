@@ -10,7 +10,8 @@
 
 /* Developed by: Rami Rosen: http://ramirose.wix.com/ramirosen */
 /* ramirose@gmail.com */
-
+                                  
+#ifndef CENTOS         	 
 #define SNMP_SET_STATS64_BH(mib, field)                         \
          do {                                                            \
                  __typeof__(*mib) *ptr = raw_cpu_ptr(mib);               \
@@ -18,7 +19,16 @@
                  ptr->mibs[field] = 0;                    		\
                  u64_stats_update_end(&ptr->syncp);                      \
          } while (0)
- 
+#else
+#define SNMP_SET_STATS64_BH(mib, field)                         \
+        do {                                                            \
+                __typeof__(*mib[0]) *ptr = __this_cpu_ptr((mib)[0]);    \
+                u64_stats_update_begin(&ptr->syncp);                    \
+                ptr->mibs[field] = 0;                        \
+                u64_stats_update_end(&ptr->syncp);                      \
+        } while (0)
+#endif
+
  #define SNMP_SET_STATS64_USER(mib, field)                       \
          do {                                                            \
                  local_bh_disable();                                     \
@@ -34,7 +44,6 @@
 /* Supports 64 bit machine; currently no support for 32 bit machines. */
 #define F20
 #ifdef F20
-
 static const struct snmp_mib snmp4_net_list[] = {
 	SNMP_MIB_ITEM("SyncookiesSent", LINUX_MIB_SYNCOOKIESSENT),
 	SNMP_MIB_ITEM("SyncookiesRecv", LINUX_MIB_SYNCOOKIESRECV),
@@ -324,7 +333,9 @@ static const struct snmp_mib snmp4_udp_list[] = {
          SNMP_MIB_ITEM("RcvbufErrors", UDP_MIB_RCVBUFERRORS),
          SNMP_MIB_ITEM("SndbufErrors", UDP_MIB_SNDBUFERRORS),
          SNMP_MIB_ITEM("InCsumErrors", UDP_MIB_CSUMERRORS),
+#ifndef CENTOS         
          SNMP_MIB_ITEM("IgnoredMulti", UDP_MIB_IGNOREDMULTI),
+#endif         
          SNMP_MIB_SENTINEL
  };         
  
@@ -344,7 +355,7 @@ static int __init init_snmp_reset(void)
 	
 			 
 	for (i = 0; snmp4_tcp_list[i].name != NULL; i++) 
-			__this_cpu_write((&init_net)->mib.tcp_statistics->mibs[snmp4_tcp_list[i].entry], 0);
+		__this_cpu_write((&init_net)->mib.tcp_statistics->mibs[snmp4_tcp_list[i].entry], 0);
 		
 
 	for (i = 0; snmp4_udp_list[i].name != NULL; i++)
