@@ -6,13 +6,35 @@
 #include <net/net_namespace.h>
 #include <linux/icmp.h>
 #include <net/icmp.h>
+#include <net/ip.h>
 
 /* Developed by: Rami Rosen: http://ramirose.wix.com/ramirosen */
 /* ramirose@gmail.com */
 
+#define SNMP_SET_STATS64_BH(mib, field)                         \
+         do {                                                            \
+                 __typeof__(*mib) *ptr = raw_cpu_ptr(mib);               \
+                 u64_stats_update_begin(&ptr->syncp);                    \
+                 ptr->mibs[field] = 0;                    		\
+                 u64_stats_update_end(&ptr->syncp);                      \
+         } while (0)
+ 
+ #define SNMP_SET_STATS64_USER(mib, field)                       \
+         do {                                                            \
+                 local_bh_disable();                                     \
+                 SNMP_SET_STATS64_BH(mib, field);                \
+                 local_bh_enable();                                      \
+         } while (0)
+
+#define SNMP_SET_STATS64(mib, field)                            \
+                 SNMP_SET_STATS64_USER(mib, field)
+//#define IP_SET_STATS(net, field)   SNMP_SET_STATS64((net)->mib.ip_statistics, field)
+#define IP_SET_STATS(mib, field)   SNMP_SET_STATS64(mib, field)
+
 /* Supports 64 bit machine; currently no support for 32 bit machines. */
 #define F20
 #ifdef F20
+
 static const struct snmp_mib snmp4_net_list[] = {
 	SNMP_MIB_ITEM("SyncookiesSent", LINUX_MIB_SYNCOOKIESSENT),
 	SNMP_MIB_ITEM("SyncookiesRecv", LINUX_MIB_SYNCOOKIESRECV),
@@ -105,6 +127,26 @@ static const struct snmp_mib snmp4_net_list[] = {
 	SNMP_MIB_ITEM("TCPFastOpenPassiveFail", LINUX_MIB_TCPFASTOPENPASSIVEFAIL),
 	SNMP_MIB_ITEM("TCPFastOpenListenOverflow", LINUX_MIB_TCPFASTOPENLISTENOVERFLOW),
 	SNMP_MIB_ITEM("TCPFastOpenCookieReqd", LINUX_MIB_TCPFASTOPENCOOKIEREQD),
+#ifdef F22
+	SNMP_MIB_ITEM("TCPSpuriousRtxHostQueues", LINUX_MIB_TCPSPURIOUS_RTX_HOSTQUEUES),
+	SNMP_MIB_ITEM("BusyPollRxPackets", LINUX_MIB_BUSYPOLLRXPACKETS),
+	SNMP_MIB_ITEM("TCPAutoCorking", LINUX_MIB_TCPAUTOCORKING),
+	SNMP_MIB_ITEM("TCPFromZeroWindowAdv", LINUX_MIB_TCPFROMZEROWINDOWADV),
+	SNMP_MIB_ITEM("TCPToZeroWindowAdv", LINUX_MIB_TCPTOZEROWINDOWADV),
+	SNMP_MIB_ITEM("TCPWantZeroWindowAdv", LINUX_MIB_TCPWANTZEROWINDOWADV),
+	SNMP_MIB_ITEM("TCPSynRetrans", LINUX_MIB_TCPSYNRETRANS),
+	SNMP_MIB_ITEM("TCPOrigDataSent", LINUX_MIB_TCPORIGDATASENT),
+	SNMP_MIB_ITEM("TCPHystartTrainDetect", LINUX_MIB_TCPHYSTARTTRAINDETECT),
+	SNMP_MIB_ITEM("TCPHystartTrainCwnd", LINUX_MIB_TCPHYSTARTTRAINCWND),
+	SNMP_MIB_ITEM("TCPHystartDelayDetect", LINUX_MIB_TCPHYSTARTDELAYDETECT),
+	SNMP_MIB_ITEM("TCPHystartDelayCwnd", LINUX_MIB_TCPHYSTARTDELAYCWND),
+	SNMP_MIB_ITEM("TCPACKSkippedSynRecv", LINUX_MIB_TCPACKSKIPPEDSYNRECV),
+	SNMP_MIB_ITEM("TCPACKSkippedPAWS", LINUX_MIB_TCPACKSKIPPEDPAWS),
+	SNMP_MIB_ITEM("TCPACKSkippedSeq", LINUX_MIB_TCPACKSKIPPEDSEQ),
+	SNMP_MIB_ITEM("TCPACKSkippedFinWait2", LINUX_MIB_TCPACKSKIPPEDFINWAIT2),
+	SNMP_MIB_ITEM("TCPACKSkippedTimeWait", LINUX_MIB_TCPACKSKIPPEDTIMEWAIT),
+	SNMP_MIB_ITEM("TCPACKSkippedChallenge", LINUX_MIB_TCPACKSKIPPEDCHALLENGE),
+#endif
 	SNMP_MIB_SENTINEL
 };
 #else
@@ -264,25 +306,17 @@ static const struct snmp_mib snmp4_tcp_list[] = {
 };
 
 static const struct snmp_mib snmp4_udp_list[] = {
-	SNMP_MIB_ITEM("InDatagrams", UDP_MIB_INDATAGRAMS),
-	SNMP_MIB_ITEM("NoPorts", UDP_MIB_NOPORTS),
-	SNMP_MIB_ITEM("InErrors", UDP_MIB_INERRORS),
-	SNMP_MIB_ITEM("OutDatagrams", UDP_MIB_OUTDATAGRAMS),
-	SNMP_MIB_ITEM("RcvbufErrors", UDP_MIB_RCVBUFERRORS),
-	SNMP_MIB_ITEM("SndbufErrors", UDP_MIB_SNDBUFERRORS),
-	SNMP_MIB_SENTINEL
-};
-
-void snmp_zero_field(void __percpu *mib[], int offt)
-{
-	int i;
-	
-	for_each_possible_cpu(i) 
-		*(((unsigned long *) per_cpu_ptr(mib[0], i)) + offt) = 0;
-
-}
-
-
+         SNMP_MIB_ITEM("InDatagrams", UDP_MIB_INDATAGRAMS),
+         SNMP_MIB_ITEM("NoPorts", UDP_MIB_NOPORTS),
+         SNMP_MIB_ITEM("InErrors", UDP_MIB_INERRORS),
+         SNMP_MIB_ITEM("OutDatagrams", UDP_MIB_OUTDATAGRAMS),
+         SNMP_MIB_ITEM("RcvbufErrors", UDP_MIB_RCVBUFERRORS),
+         SNMP_MIB_ITEM("SndbufErrors", UDP_MIB_SNDBUFERRORS),
+         SNMP_MIB_ITEM("InCsumErrors", UDP_MIB_CSUMERRORS),
+         SNMP_MIB_ITEM("IgnoredMulti", UDP_MIB_IGNOREDMULTI),
+         SNMP_MIB_SENTINEL
+ };         
+ 
 static int __init init_snmp_reset(void)
 {
 	int i;
@@ -292,29 +326,31 @@ static int __init init_snmp_reset(void)
 	printk(KERN_DEBUG "Developed  by Rami Rosen (ramirose@gmail.com): http://ramirose.wix.com/ramirosen\n");
 
 	BUILD_BUG_ON(offsetof(struct ipstats_mib, mibs) != 0);
-	for (i = 0; snmp4_ipstats_list[i].name != NULL; i++)
-			   snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
-					     snmp4_ipstats_list[i].entry);
-
+	
+	for (i = 0; snmp4_ipstats_list[i].name != NULL; i++) {
+			IP_SET_STATS((&init_net)->mib.ip_statistics, snmp4_ipstats_list[i].entry);
+	}
+	
+			 
 	for (i = 0; snmp4_tcp_list[i].name != NULL; i++) 
-			snmp_zero_field((void __percpu **)(&init_net)->mib.tcp_statistics,
-						   				snmp4_tcp_list[i].entry);
+			__this_cpu_write((&init_net)->mib.tcp_statistics->mibs[snmp4_tcp_list[i].entry], 0);
+		
 
 	for (i = 0; snmp4_udp_list[i].name != NULL; i++)
-  	  snmp_zero_field((void __percpu **)(&init_net)->mib.udp_statistics,
-				   snmp4_udp_list[i].entry);
+  	  	__this_cpu_write((&init_net)->mib.udp_statistics->mibs[snmp4_udp_list[i].entry], 0);
+				   
 
 	for (i = 0; snmp4_net_list[i].name != NULL; i++)
-  	snmp_zero_field((void __percpu **)(&init_net)->mib.net_statistics,
-					     snmp4_net_list[i].entry);
+  	  	  	__this_cpu_write((&init_net)->mib.net_statistics->mibs[snmp4_net_list[i].entry], 0);
+					     
 
 	for (i = 0; snmp4_ipextstats_list[i].name != NULL; i++)
-  	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
-					     snmp4_ipextstats_list[i].entry);
+ 		__this_cpu_write((&init_net)->mib.ip_statistics->mibs[snmp4_ipextstats_list[i].entry], 0);
+					     
 #ifdef F20 
 	for (i=0; icmpmibmap[i].name != NULL; i++) {
-    atomic_long_set((ptr + icmpmibmap[i].index), 0);
-	  atomic_long_set((ptr + (icmpmibmap[i].index | 0x100)), 0);
+		atomic_long_set((ptr + icmpmibmap[i].index), 0);
+		atomic_long_set((ptr + (icmpmibmap[i].index | 0x100)), 0);
 	}
 #else
 	for (i=0; icmpmibmap[i].name != NULL; i++) {
@@ -325,11 +361,10 @@ static int __init init_snmp_reset(void)
 	}
 #endif
 
-	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_INMSGS);
-	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_INERRORS);		
-	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_OUTMSGS);
-	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_OUTERRORS);		
-	
+	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_INMSGS], 0);
+	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_INERRORS], 0);		
+	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_OUTMSGS], 0);
+	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_OUTERRORS], 0);		
 
 	return 0;
 }
