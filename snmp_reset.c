@@ -28,7 +28,7 @@
 
 #define SNMP_SET_STATS64(mib, field)                            \
                  SNMP_SET_STATS64_USER(mib, field)
-//#define IP_SET_STATS(net, field)   SNMP_SET_STATS64((net)->mib.ip_statistics, field)
+
 #define IP_SET_STATS(mib, field)   SNMP_SET_STATS64(mib, field)
 
 /* Supports 64 bit machine; currently no support for 32 bit machines. */
@@ -242,6 +242,14 @@ static const struct snmp_mib snmp4_ipextstats_list[] = {
 	SNMP_MIB_ITEM("OutMcastOctets", IPSTATS_MIB_OUTMCASTOCTETS),
 	SNMP_MIB_ITEM("InBcastOctets", IPSTATS_MIB_INBCASTOCTETS),
 	SNMP_MIB_ITEM("OutBcastOctets", IPSTATS_MIB_OUTBCASTOCTETS),
+#ifdef F22
+	/* Non RFC4293 fields */
+	SNMP_MIB_ITEM("InCsumErrors", IPSTATS_MIB_CSUMERRORS),
+	SNMP_MIB_ITEM("InNoECTPkts", IPSTATS_MIB_NOECTPKTS),
+	SNMP_MIB_ITEM("InECT1Pkts", IPSTATS_MIB_ECT1PKTS),
+	SNMP_MIB_ITEM("InECT0Pkts", IPSTATS_MIB_ECT0PKTS),
+	SNMP_MIB_ITEM("InCEPkts", IPSTATS_MIB_CEPKTS),
+#endif
 	SNMP_MIB_SENTINEL
 };
 
@@ -302,6 +310,9 @@ static const struct snmp_mib snmp4_tcp_list[] = {
 	SNMP_MIB_ITEM("RetransSegs", TCP_MIB_RETRANSSEGS),
 	SNMP_MIB_ITEM("InErrs", TCP_MIB_INERRS),
 	SNMP_MIB_ITEM("OutRsts", TCP_MIB_OUTRSTS),
+#ifdef F22
+	SNMP_MIB_ITEM("InCsumErrors", TCP_MIB_CSUMERRORS),
+#endif
 	SNMP_MIB_SENTINEL
 };
 
