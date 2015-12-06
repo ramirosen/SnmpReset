@@ -12,6 +12,8 @@ With fedora, this is done by "yum install kernel-devel".
 In order to reset the SNMP counters, simply run:
 insmod snmp_reset.ko 
 
+In order to build for Fedora 22, you nead to run:
+make EXTRA_CFLAGS=-DF22
 
 If you uncomment the line "#define F20" in snmp_reset.c, the kernel 
 module will built succesfully under
