@@ -363,21 +363,35 @@ static int __init init_snmp_reset(void)
 	}
 	
 			 
-	for (i = 0; snmp4_tcp_list[i].name != NULL; i++) 
+	for (i = 0; snmp4_tcp_list[i].name != NULL; i++)
+#ifndef CENTOS		
 		__this_cpu_write((&init_net)->mib.tcp_statistics->mibs[snmp4_tcp_list[i].entry], 0);
-		
+#else
+		snmp_zero_field((void __percpu **)(&init_net)->mib.tcp_statistics,
+		   					snmp4_tcp_list[i].entry);
+#endif
 
 	for (i = 0; snmp4_udp_list[i].name != NULL; i++)
-  	  	__this_cpu_write((&init_net)->mib.udp_statistics->mibs[snmp4_udp_list[i].entry], 0);
-				   
-
+#ifndef CENTOS		
+ 	  	__this_cpu_write((&init_net)->mib.udp_statistics->mibs[snmp4_udp_list[i].entry], 0);
+#else
+	  	  snmp_zero_field((void __percpu **)(&init_net)->mib.udp_statistics,
+				   snmp4_udp_list[i].entry);
+#endif
 	for (i = 0; snmp4_net_list[i].name != NULL; i++)
-  	  	  	__this_cpu_write((&init_net)->mib.net_statistics->mibs[snmp4_net_list[i].entry], 0);
-					     
-
+#ifndef CENTOS
+		__this_cpu_write((&init_net)->mib.net_statistics->mibs[snmp4_net_list[i].entry], 0);
+#else					     
+  		snmp_zero_field((void __percpu **)(&init_net)->mib.net_statistics,
+					     snmp4_net_list[i].entry);
+#endif
 	for (i = 0; snmp4_ipextstats_list[i].name != NULL; i++)
+#ifndef CENTOS		
  		__this_cpu_write((&init_net)->mib.ip_statistics->mibs[snmp4_ipextstats_list[i].entry], 0);
-					     
+#else
+  		snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
+					     snmp4_ipextstats_list[i].entry);
+#endif
 #ifdef F20 
 	for (i=0; icmpmibmap[i].name != NULL; i++) {
 		atomic_long_set((ptr + icmpmibmap[i].index), 0);
@@ -385,9 +399,9 @@ static int __init init_snmp_reset(void)
 	}
 #else
 	for (i=0; icmpmibmap[i].name != NULL; i++) {
-  	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
+		snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
 					     icmpmibmap[i].index);
-  	snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
+		snmp_zero_field((void __percpu **)(&init_net)->mib.ip_statistics,
 					     (icmpmibmap[i].index | 0x100));
 	}
 #endif
