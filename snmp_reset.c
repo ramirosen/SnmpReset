@@ -406,11 +406,17 @@ static int __init init_snmp_reset(void)
 	}
 #endif
 
+#ifndef CENTOS
 	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_INMSGS], 0);
 	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_INERRORS], 0);		
 	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_OUTMSGS], 0);
 	__this_cpu_write((&init_net)->mib.icmp_statistics->mibs[ICMP_MIB_OUTERRORS], 0);		
-
+#else
+	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_INMSGS);
+	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_INERRORS);		
+	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_OUTMSGS);
+	snmp_zero_field((void __percpu **)(&init_net)->mib.icmp_statistics, ICMP_MIB_OUTERRORS);		
+#endif
 	return 0;
 }
 
