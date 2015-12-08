@@ -1,3 +1,4 @@
+
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -10,6 +11,14 @@
 
 /* Developed by: Rami Rosen: http://ramirose.wix.com/ramirosen */
 /* ramirose@gmail.com */
+
+void snmp_zero_field(void __percpu *mib[], int offt)
+{
+        int i;
+
+        for_each_possible_cpu(i)
+                *(((unsigned long *) per_cpu_ptr(mib[0], i)) + offt) = 0;
+}
                                   
 #ifndef CENTOS         	 
 #define SNMP_SET_STATS64_BH(mib, field)                         \
