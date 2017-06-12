@@ -9,8 +9,11 @@
 #include <net/icmp.h>
 #include <net/ip.h>
 
-/* Developed by: Rami Rosen: http://ramirose.wix.com/ramirosen */
-/* ramirose@gmail.com */
+/* Developed by: Rami Rosen: http://ramirose.wix.com/ramirosen 
+  A kernel module for zeroing SNMP counters
+  https://github.com/ramirosen/SnmpReset
+
+  ramirose@gmail.com */
 
 void snmp_zero_field(void __percpu *mib[], int offt)
 {
